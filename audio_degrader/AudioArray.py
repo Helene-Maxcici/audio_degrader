@@ -9,6 +9,7 @@ Original file is located at
 
 import logging
 import sox
+import numpy as np
 
 class AudioArray(object):
     """ This class provides all needed methods to interact with an audio file
