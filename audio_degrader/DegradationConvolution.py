@@ -6,7 +6,6 @@ from scipy import signal
 import os
 from .BaseDegradation import Degradation
 
-
 class DegradationConvolution(Degradation):
 
     name = "convolution"
@@ -21,7 +20,6 @@ class DegradationConvolution(Degradation):
 
     def get_actual_impulse_response_path(self):
         """ Resolve full path of impulse response
-
         The specified impulse response path could be a relative path
         """
         import audio_degrader
@@ -33,6 +31,25 @@ class DegradationConvolution(Degradation):
             return ir_path_resource
         else:
             return ir_path
+
+    def apply(self, audio):
+        ir_path = self.get_actual_impulse_response_path()
+        level = float(self.parameters_values['level'])
+        logging.info('Convolving with %s and level %f' % (ir_path, level))
+        x = audio.samples
+        ir_x, ir_sr = sf.read(ir_path)
+        tfm = sox.Transformer()
+        tfm.set_output_format(rate=audio.sample_rate, 
+                      bits=32, channels=2)
+        ir_x = tfm.build_array(input_array = ir_x, 
+                               sample_rate_in = ir_sr)
+        ir_x = ir_x.T
+        y_wet = np.zeros(x.shape)
+        for channel in [0, 1]:
+            y_wet[channel, :] = signal.fftconvolve(
+                x[channel, :], ir_x[channel, :], mode='full')[0:x.shape[1]]
+        y = y_wet * level + x * (1 - level)
+        audio.samples = y
 
     def apply(self, audio_file):
         ir_path = self.get_actual_impulse_response_path()
