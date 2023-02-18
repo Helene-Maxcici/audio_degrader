@@ -1,7 +1,6 @@
 import soundfile as sf
 import logging
 import os
-from .utils import run
 from .BaseDegradation import Degradation
 
 
@@ -20,27 +19,20 @@ class DegradationEqualization(Degradation):
          "-10",
          "Gain of filter in dBs")]
 
-    def apply(self, audio_file):
+    def apply(self, audio):
         freq = float(self.parameters_values['central_freq'])
         bw = float(self.parameters_values['bandwidth'])
         q_factor = freq/(bw+1e-16)
         gain = float(self.parameters_values['gain'])
         logging.info("Equalizing. f=%f, bw=%f, gain=%f" % (freq, bw, gain))
-        extra_tmp_path = audio_file.tmp_path + '.extra.wav'
-        cmd = "sox {0} {1} equalizer {2} {3} {4}".format(
-            audio_file.tmp_path,
-            extra_tmp_path,
-            freq,
-            q_factor,
-            gain)
-        logging.info(cmd)
-        out, err, returncode = run(cmd)
-        if returncode != 0:
-            logging.debug(out)
-            logging.debug(err)
-            logging.error("Error running sox!")
-        y, sr = sf.read(extra_tmp_path)
+
+        tfm = sox.Transformer()
+        tfm.equalizer(frequency = bw, width_q = q_factor, gain_db = gain)
+        tfm.set_output_format(bits=32, channels=2)
+        y = tfm.build_array(input_array = audio.samples.T, 
+                            sample_rate_in = audio.sample_rate)
         y = y.T
-        os.remove(extra_tmp_path)
-        assert audio_file.sample_rate == sr
-        audio_file.samples = y
+
+        assert audio.samples.shape == y.shape
+        
+        audio.samples = y
