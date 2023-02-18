@@ -1,7 +1,7 @@
 import soundfile as sf
 import logging
 import os
-from .utils import run
+import sox
 from .BaseDegradation import Degradation
 
 
