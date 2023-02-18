@@ -14,19 +14,19 @@ class DegradationPitchShifting(Degradation):
         ("pitch_shift_factor",
          "0.9",
          "Pitch shift factor")]
-
-    def apply(self, audio_file):
+    
+    def apply(self, audio):
         pitch_shift_factor = float(
             self.parameters_values["pitch_shift_factor"])
         n_semitones = 12 * np.log2(pitch_shift_factor)
         logging.info('Shifting pitch with factor %f, i.e. %f semitones' %
                      (pitch_shift_factor, n_semitones))
-        extra_tmp_path = audio_file.tmp_path + '.extra.wav'
+
         tfm = sox.Transformer()
         tfm.pitch(n_semitones)
-        tfm.convert(n_channels=2, bitdepth=32)
-        tfm.build(audio_file.tmp_path, extra_tmp_path)
-        y, sr = sf.read(extra_tmp_path)
+        tfm.set_output_format(bits=32, channels=2)
+        
+        y = tfm.build_array(input_array = audio.samples.T, 
+                            sample_rate_in = audio.sample_rate)
         y = y.T
-        os.remove(extra_tmp_path)
-        audio_file.samples = y
+        audio.samples = y
