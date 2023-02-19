@@ -5,6 +5,7 @@ import numpy as np
 from scipy import signal
 import os
 from .BaseDegradation import Degradation
+
 class DegradationConvolution(Degradation):
 
     name = "convolution"
@@ -39,13 +40,12 @@ class DegradationConvolution(Degradation):
         ir_x, ir_sr = sf.read(ir_path)
         tfm = sox.Transformer()
         tfm.set_output_format(rate=audio.sample_rate, 
-                      bits=32, channels=2)
+                      bits=audio.bits, channels=1)
         ir_x = tfm.build_array(input_array = ir_x, 
                                sample_rate_in = ir_sr)
-        ir_x = ir_x.T
         y_wet = np.zeros(x.shape)
-        for channel in [0, 1]:
-            y_wet[channel, :] = signal.fftconvolve(
-                x[channel, :], ir_x[channel, :], mode='full')[0:x.shape[1]]
+        # Only one channel
+        y_wet = signal.fftconvolve(
+                x, ir_x, mode='full')[0:x.shape[0]]
         y = y_wet * level + x * (1 - level)
         audio.samples = y
