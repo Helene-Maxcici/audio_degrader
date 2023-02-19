@@ -22,8 +22,7 @@ class DegradationTimeStretching(Degradation):
 
         tfm = sox.Transformer()
         tfm.tempo(time_stretch_factor)
-        tfm.set_output_format(bits=32, channels=2)
-        y = tfm.build_array(input_array = audio.samples.T, 
+        tfm.set_output_format(bits=audio.bits, channels=1)
+        y = tfm.build_array(input_array = audio.samples, 
                             sample_rate_in = audio.sample_rate)
-        y = y.T
         audio.samples = y

@@ -29,11 +29,9 @@ class DegradationEqualization(Degradation):
 
         tfm = sox.Transformer()
         tfm.equalizer(frequency = bw, width_q = q_factor, gain_db = gain)
-        tfm.set_output_format(bits=32, channels=2)
-        y = tfm.build_array(input_array = audio.samples.T, 
+        tfm.set_output_format(bits=audio.bits, channels=1)
+        y = tfm.build_array(input_array = audio.samples, 
                             sample_rate_in = audio.sample_rate)
-        y = y.T
 
         assert audio.samples.shape == y.shape
-        
         audio.samples = y

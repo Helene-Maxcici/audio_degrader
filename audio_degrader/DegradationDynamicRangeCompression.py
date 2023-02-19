@@ -39,10 +39,9 @@ class DegradationDynamicRangeCompression(Degradation):
         tfm.compand(attack_time = attack_time, decay_time = decay_time, 
                     tf_points = tf_points)
         tfm.gain(gain, normalize = False, limiter = False)
-        tfm.set_output_format(bits=32, channels=2)
-        y = tfm.build_array(input_array = audio.samples.T, 
+        tfm.set_output_format(bits=audio.bits, channels=1)
+        y = tfm.build_array(input_array = audio.samples, 
                             sample_rate_in = audio.sample_rate)
-        y = y.T
 
         assert audio.samples.shape == y.shape
         audio.samples = y
