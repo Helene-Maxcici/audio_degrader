@@ -83,7 +83,8 @@ class DegradationMix(Degradation):
         return noise_gain_factor
 
     def apply(self, audio):
-        noise_samples = self.read_noise(self.parameters_values['noise'], audio)
+        noise_path = self.get_actual_noise_path()
+        noise_samples = self.read_noise(noise_path, audio)
         noise_samples = self.adjust_noise_duration(noise_samples, audio)
         rms_noise = np.sqrt(np.mean(np.power(noise_samples, 2)))
         rms_input = np.sqrt(np.mean(np.power(audio.samples, 2)))
