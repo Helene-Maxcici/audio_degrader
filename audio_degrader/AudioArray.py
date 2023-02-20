@@ -25,7 +25,6 @@ class AudioArray(object):
                               bits=self.bits, channels=1)
         self.samples = tfm.build_array(input_array = self.samples_in, 
                           sample_rate_in = self.sample_rate_in)
-        self.samples = self.samples.T
 
     def apply_degradation(self, degradation):
         self.applied_degradations.append(degradation)
@@ -36,6 +35,5 @@ class AudioArray(object):
         tfm = sox.Transformer()
         tfm.set_output_format(rate=new_sample_rate, 
                       bits=self.bits, channels=1)
-        self.samples = tfm.build_array(input_array = self.samples.T, 
+        self.samples = tfm.build_array(input_array = self.samples, 
                           sample_rate_in = self.sample_rate)
-        self.samples = self.samples.T
